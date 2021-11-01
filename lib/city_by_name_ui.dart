@@ -3,7 +3,8 @@ import 'package:kurs2_sabak8/weather_provider.dart';
 
 class CityByNameUI extends StatefulWidget {
   final String cityName;
-  const CityByNameUI({Key key, this.cityName}) : super(key: key);
+  final int temp;
+  const CityByNameUI({Key key, this.cityName, this.temp}) : super(key: key);
 
   @override
   _CityByNameUIState createState() => _CityByNameUIState();

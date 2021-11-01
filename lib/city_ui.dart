@@ -127,6 +127,7 @@ class _CityUIState extends State<CityUI> {
                     MaterialPageRoute(
                       builder: (context) => CityByNameUI(
                         cityName: _cityNameController.text,
+                        temp: _celcius, //bul jon gana misal uchun
                       ),
                     ),
                   );
