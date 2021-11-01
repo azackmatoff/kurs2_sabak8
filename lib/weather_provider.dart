@@ -6,17 +6,22 @@ import 'package:kurs2_sabak8/utilities/constants.dart';
 
 class WeatherProvider {
   Future<Map<String, dynamic>> getWeatherData(
-      String city, bool isLocation, Position position) async {
+      {String city = '', Position position}) async {
     //  https://api.openweathermap.org/data/2.5/weather?q=Bishkek&appid=51c874e49dc37ecae309a5aad34f104f
 
+    print('getWeatherData.city: $city');
     String baseUrl = 'https://api.openweathermap.org/data/2.5/weather?';
-
+    String endpointByLocation;
     String endpointByName = 'q=$city&appid=$apiKey';
-    String endpointByLocation =
-        'lat=${position.latitude}&lon=${position.longitude}&appid=$apiKey';
+    if (city == '') {
+      endpointByLocation =
+          'lat=${position.latitude}&lon=${position.longitude}&appid=$apiKey';
+    }
 
     String url =
-        isLocation ? baseUrl + endpointByLocation : baseUrl + endpointByName;
+        city == '' ? baseUrl + endpointByLocation : baseUrl + endpointByName;
+
+    print('url:========= $url');
 
     Uri uri = Uri.parse(url);
 
@@ -25,10 +30,11 @@ class WeatherProvider {
     if (response.statusCode == 200 || response.statusCode == 201) {
       final body = response.body;
 
-      print('body: $body');
+      // print('json body: $body');
 
       final data = convert.jsonDecode(body) as Map<String, dynamic>;
-      print('data: $data');
+      print('Map data: ${data['name']}');
+      print('Map data temperature: ${data['main']['temp']}');
 
       return data;
     } else {
