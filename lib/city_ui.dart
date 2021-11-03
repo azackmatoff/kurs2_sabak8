@@ -4,6 +4,9 @@ import 'package:kurs2_sabak8/circular_progress.dart';
 import 'package:kurs2_sabak8/city_by_name_ui.dart';
 import 'package:kurs2_sabak8/location_provider.dart';
 import 'package:kurs2_sabak8/progress_indicator.dart';
+import 'package:kurs2_sabak8/screens/city_screen.dart';
+import 'package:kurs2_sabak8/utilities/constants.dart';
+import 'package:kurs2_sabak8/weather_model.dart';
 import 'package:kurs2_sabak8/weather_provider.dart';
 
 //Flutter StatefulWidget lifecycle
@@ -19,9 +22,15 @@ class _CityUIState extends State<CityUI> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _cityNameController = TextEditingController();
   Position _position;
+
+  bool isLoading = false;
   Map<String, dynamic> _data;
   int _celcius = 0;
   String _cityName;
+  String weatherIcon;
+  String weatherMessage;
+
+  WeatherModel weatherModel;
 
   @override
   void initState() {
@@ -41,7 +50,7 @@ class _CityUIState extends State<CityUI> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     //kodtor astinda jazilish kerke
-    getCurrentLocation();
+    getCurrentLocationV2();
     // showSnackbar();
     //contest aluu uchun kutkonu jardam beret
     // WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -51,10 +60,29 @@ class _CityUIState extends State<CityUI> {
     print('didChangeDependencies');
   }
 
-  Future<void> getCurrentLocation() async {
+  Future<void> getCurrentLocationV2() async {
+    setState(() {
+      isLoading = true;
+    });
+    _position = await LocationProvider().getCurrentPosition();
+    weatherModel = await WeatherProvider().getWeatherModel(position: _position);
+
+    await Future.delayed(Duration(seconds: 1), () {});
+
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  Future<void> getCurrentLocationV1() async {
+    setState(() {
+      isLoading = true;
+    });
     _position = await LocationProvider().getCurrentPosition();
 
     _data = await WeatherProvider().getWeatherData(position: _position);
+
+    weatherModel = await WeatherProvider().getWeatherModel(position: _position);
 
     double _kelvin = _data['main']['temp'];
 
@@ -62,11 +90,14 @@ class _CityUIState extends State<CityUI> {
 
     _celcius = (_kelvin - 273.15).round();
 
-    print('_position.lat: ${_position.latitude}');
-    print('_position.long: ${_position.longitude}');
+    // print('_position.lat: ${_position.latitude}');
+    // print('_position.long: ${_position.longitude}');
 
     await Future.delayed(Duration(seconds: 1), () {});
-    setState(() {});
+
+    setState(() {
+      isLoading = false;
+    });
   }
 
   void showSnackbar() {
@@ -160,43 +191,137 @@ class _CityUIState extends State<CityUI> {
     print('build');
 
     return Scaffold(
-      body: _position == null
+      body: isLoading
           ? circularProgress()
           : Scaffold(
               key: scaffoldKey,
-              appBar: AppBar(
-                leading: Icon(Icons.near_me),
-                actions: [
-                  GestureDetector(
-                    onTap: _showMyDialog,
-                    child: Padding(
-                      padding: const EdgeInsets.only(right: 12.0),
-                      child: Icon(Icons.location_city),
-                    ),
+              body: Container(
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage('assets/images/location_background.jpg'),
+                    fit: BoxFit.cover,
+                    colorFilter: ColorFilter.mode(
+                        Colors.white.withOpacity(0.8), BlendMode.dstATop),
                   ),
-                ],
-              ),
-              body: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text('City: $_cityName'), //Shaar aty versiya 1
-                    Text('City: ${_data['name']}'), //Shaar aty versiya 2
-                    Text('Temperature F: ${_data['main']['temp']}'),
-                    Text('Temperature C: $_celcius'),
-                    // Text('Latitude: ${_position.latitude}'),
-                    // Text('Latitude: ${_position.latitude}'),
-                    // Text('Longitude: ${_position.longitude}'),
-                    // Text('Longitude: ${_position.longitude}'),
-                    // TextButton(
-                    //   onPressed: _showMyDialog,
-                    //   child: Text('snackbar'),
-                    // ),
-                  ],
+                ),
+                constraints: BoxConstraints.expand(),
+                child: SafeArea(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          FlatButton(
+                            onPressed: () async {
+                              getCurrentLocationV2();
+                              // var weatherData =
+                              //     await weather.getLocationWeather();
+                              // updateUI(weatherData);
+                            },
+                            child: Icon(
+                              Icons.near_me,
+                              size: 50.0,
+                            ),
+                          ),
+                          FlatButton(
+                            onPressed: () async {
+                              // _showMyDialog();
+                              String typedCity = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) {
+                                    return CityScreen();
+                                  },
+                                ),
+                              );
+
+                              if (typedCity != null) {
+                                setState(() {
+                                  isLoading = true;
+                                });
+                                weatherModel = await WeatherProvider()
+                                    .getWeatherModel(city: typedCity);
+
+                                setState(() {
+                                  isLoading = false;
+                                });
+                              }
+                              // var typedName = await Navigator.push(
+                              //   context,
+                              //   MaterialPageRoute(
+                              //     builder: (context) {
+                              //       return CityByNameUI(
+                              //         cityName: _cityName,
+                              //       );
+                              //     },
+                              //   ),
+                              // );
+                              // if (typedName != null) {
+                              //   // var weatherData =
+                              //   //     await weather.getCityWeather(typedName);
+                              //   // updateUI(weatherData);
+                              // }
+                            },
+                            child: Icon(
+                              Icons.location_city,
+                              size: 50.0,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(left: 15.0),
+                        child: Row(
+                          children: <Widget>[
+                            Text(
+                              '${weatherModel.celcius}',
+                              style: kTempTextStyle,
+                            ), //Model menen ishtegen
+                            // Text(
+                            //   '$_celcius',
+                            //   style: kTempTextStyle,
+                            // ),  //Model jasabay tuz ishtoo
+                            Text(
+                              weatherModel.icon ?? '☀️',
+                              style: kConditionTextStyle,
+                            ), //Model mn ishtoo
+                            // Text(
+                            //   weatherIcon ?? '☀️',
+                            //   style: kConditionTextStyle,
+                            // ),//Model jok ishtoo
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(right: 15.0),
+                        child: Text(
+                          weatherModel.message == null
+                              ? 'Weather in ${weatherModel.cityName}'
+                              : '${weatherModel.message} in ${weatherModel.cityName}',
+                          textAlign: TextAlign.right,
+                          style: kMessageTextStyle,
+                        ),
+                        // Text(
+                        //   weatherMessage == null
+                        //       ? 'Weather in $_cityName'
+                        //       : '$weatherMessage in $_cityName',
+                        //   textAlign: TextAlign.right,
+                        //   style: kMessageTextStyle,
+                        // ), //Model jok ishtoo
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
     );
   }
 }
+
+
+//OOP Object Oriented Programming language
+
+//Model 
+//Class
