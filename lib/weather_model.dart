@@ -6,6 +6,8 @@ class WeatherModel {
   final int celcius;
   final String icon;
   final String message;
+  // final int saat;
+  // final int minute;
 
   WeatherModel({
     this.cityName,
@@ -13,6 +15,8 @@ class WeatherModel {
     this.celcius,
     this.icon,
     this.message,
+    // this.saat,
+    // this.minute,
   });
 
   factory WeatherModel.fromJson(Map<String, dynamic> json) => WeatherModel(

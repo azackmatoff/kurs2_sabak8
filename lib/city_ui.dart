@@ -220,9 +220,6 @@ class _CityUIState extends State<CityUI> {
                           FlatButton(
                             onPressed: () async {
                               getCurrentLocationV2();
-                              // var weatherData =
-                              //     await weather.getLocationWeather();
-                              // updateUI(weatherData);
                             },
                             child: Icon(
                               Icons.near_me,
@@ -259,21 +256,6 @@ class _CityUIState extends State<CityUI> {
                                   isLoading = false;
                                 });
                               }
-                              // var typedName = await Navigator.push(
-                              //   context,
-                              //   MaterialPageRoute(
-                              //     builder: (context) {
-                              //       return CityByNameUI(
-                              //         cityName: _cityName,
-                              //       );
-                              //     },
-                              //   ),
-                              // );
-                              // if (typedName != null) {
-                              //   // var weatherData =
-                              //   //     await weather.getCityWeather(typedName);
-                              //   // updateUI(weatherData);
-                              // }
                             },
                             child: Icon(
                               Icons.location_city,
