@@ -69,6 +69,10 @@ class _CityUIState extends State<CityUI> {
 
     await Future.delayed(Duration(seconds: 1), () {});
 
+    if (isLoading == false) {
+      ///
+    }
+
     setState(() {
       isLoading = false;
     });
@@ -243,6 +247,11 @@ class _CityUIState extends State<CityUI> {
                                 });
                                 weatherModel = await WeatherProvider()
                                     .getWeatherModel(city: typedCity);
+
+                                if (weatherModel.cityName == 'Bishkek') {
+                                  ///
+                                  // weatherModel.cityName = 'Osh'; //Minday ozgortuu uchun Model de final bolboo kerek
+                                }
 
                                 await Future.delayed(Duration(seconds: 1));
 
