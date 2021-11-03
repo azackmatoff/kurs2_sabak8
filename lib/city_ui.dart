@@ -191,21 +191,21 @@ class _CityUIState extends State<CityUI> {
     print('build');
 
     return Scaffold(
-      body: isLoading
-          ? circularProgress()
-          : Scaffold(
-              key: scaffoldKey,
-              body: Container(
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage('assets/images/location_background.jpg'),
-                    fit: BoxFit.cover,
-                    colorFilter: ColorFilter.mode(
-                        Colors.white.withOpacity(0.8), BlendMode.dstATop),
-                  ),
-                ),
-                constraints: BoxConstraints.expand(),
-                child: SafeArea(
+      body: Scaffold(
+        key: scaffoldKey,
+        body: Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('assets/images/location_background.jpg'),
+              fit: BoxFit.cover,
+              colorFilter: ColorFilter.mode(
+                  Colors.white.withOpacity(0.8), BlendMode.dstATop),
+            ),
+          ),
+          constraints: BoxConstraints.expand(),
+          child: isLoading
+              ? circularProgress()
+              : SafeArea(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -243,6 +243,8 @@ class _CityUIState extends State<CityUI> {
                                 });
                                 weatherModel = await WeatherProvider()
                                     .getWeatherModel(city: typedCity);
+
+                                await Future.delayed(Duration(seconds: 1));
 
                                 setState(() {
                                   isLoading = false;
@@ -314,8 +316,8 @@ class _CityUIState extends State<CityUI> {
                     ],
                   ),
                 ),
-              ),
-            ),
+        ),
+      ),
     );
   }
 }
