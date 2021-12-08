@@ -22,9 +22,9 @@ class WeatherModel {
   factory WeatherModel.fromJson(Map<String, dynamic> json) => WeatherModel(
         cityName: json['name'],
         kelvin: json['main']['temp'],
-        celcius: WeatherUtil().kelvinToCelcius(json['main']['temp']),
-        icon: WeatherUtil().getWeatherIcon((json['main']['temp']).round()),
-        message: WeatherUtil().getWeatherMessage(
-            WeatherUtil().kelvinToCelcius(json['main']['temp'])),
+        celcius: WeatherUtil.kelvinToCelcius(json['main']['temp']),
+        icon: WeatherUtil.getWeatherIcon((json['main']['temp']).round()),
+        message: WeatherUtil.getWeatherMessage(
+            WeatherUtil.kelvinToCelcius(json['main']['temp'])),
       );
 }

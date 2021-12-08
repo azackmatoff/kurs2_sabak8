@@ -1,23 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:kurs2_sabak8/circular_progress.dart';
-import 'package:kurs2_sabak8/city_by_name_ui.dart';
-import 'package:kurs2_sabak8/location_provider.dart';
-import 'package:kurs2_sabak8/progress_indicator.dart';
+import 'package:kurs2_sabak8/constants/app_text_styles.dart';
+import 'package:kurs2_sabak8/repositories/weather_repo.dart';
+
+import 'package:kurs2_sabak8/screens/city_by_name_screen.dart';
+import 'package:kurs2_sabak8/data/providers/location_provider.dart';
+import 'package:kurs2_sabak8/widgets/progress_indicator.dart';
 import 'package:kurs2_sabak8/screens/city_screen.dart';
-import 'package:kurs2_sabak8/utilities/constants.dart';
-import 'package:kurs2_sabak8/weather_model.dart';
-import 'package:kurs2_sabak8/weather_provider.dart';
+
+import 'package:kurs2_sabak8/models/weather_model.dart';
+import 'package:kurs2_sabak8/data/providers/weather_provider.dart';
 
 //Flutter StatefulWidget lifecycle
-class CityUI extends StatefulWidget {
-  const CityUI({Key key}) : super(key: key);
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({Key key}) : super(key: key);
 
   @override
-  _CityUIState createState() => _CityUIState();
+  _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _CityUIState extends State<CityUI> {
+class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _cityNameController = TextEditingController();
@@ -50,7 +52,7 @@ class _CityUIState extends State<CityUI> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     //kodtor astinda jazilish kerke
-    getCurrentLocationV2();
+    getWeatherByCurrentLocation();
     // showSnackbar();
     //contest aluu uchun kutkonu jardam beret
     // WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -60,44 +62,12 @@ class _CityUIState extends State<CityUI> {
     print('didChangeDependencies');
   }
 
-  Future<void> getCurrentLocationV2() async {
+  Future<void> getWeatherByCurrentLocation() async {
     setState(() {
       isLoading = true;
     });
-    _position = await LocationProvider().getCurrentPosition();
-    weatherModel = await WeatherProvider().getWeatherModel(position: _position);
 
-    await Future.delayed(Duration(seconds: 1), () {});
-
-    if (isLoading == false) {
-      ///
-    }
-
-    setState(() {
-      isLoading = false;
-    });
-  }
-
-  Future<void> getCurrentLocationV1() async {
-    setState(() {
-      isLoading = true;
-    });
-    _position = await LocationProvider().getCurrentPosition();
-
-    _data = await WeatherProvider().getWeatherData(position: _position);
-
-    weatherModel = await WeatherProvider().getWeatherModel(position: _position);
-
-    double _kelvin = _data['main']['temp'];
-
-    _cityName = _data['name'];
-
-    _celcius = (_kelvin - 273.15).round();
-
-    // print('_position.lat: ${_position.latitude}');
-    // print('_position.long: ${_position.longitude}');
-
-    await Future.delayed(Duration(seconds: 1), () {});
+    weatherModel = await weatherRepo.getWeatherByCurrentLocation();
 
     setState(() {
       isLoading = false;
@@ -160,7 +130,7 @@ class _CityUIState extends State<CityUI> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => CityByNameUI(
+                      builder: (context) => CityByNameScreen(
                         cityName: _cityNameController.text,
                         temp: _celcius, //bul jon gana misal uchun
                       ),
@@ -219,7 +189,7 @@ class _CityUIState extends State<CityUI> {
                         children: <Widget>[
                           FlatButton(
                             onPressed: () async {
-                              getCurrentLocationV2();
+                              getWeatherByCurrentLocation();
                             },
                             child: Icon(
                               Icons.near_me,
@@ -242,13 +212,8 @@ class _CityUIState extends State<CityUI> {
                                 setState(() {
                                   isLoading = true;
                                 });
-                                weatherModel = await WeatherProvider()
-                                    .getWeatherModel(city: typedCity);
-
-                                if (weatherModel.cityName == 'Bishkek') {
-                                  ///
-                                  // weatherModel.cityName = 'Osh'; //Minday ozgortuu uchun Model de final bolboo kerek
-                                }
+                                weatherModel = await weatherRepo
+                                    .getWeatherByCity(typedCity);
 
                                 await Future.delayed(Duration(seconds: 1));
 
@@ -270,7 +235,7 @@ class _CityUIState extends State<CityUI> {
                           children: <Widget>[
                             Text(
                               '${weatherModel.celcius}',
-                              style: kTempTextStyle,
+                              style: AppTextStyles.tempTextStyle,
                             ), //Model menen ishtegen
                             // Text(
                             //   '$_celcius',
@@ -278,7 +243,7 @@ class _CityUIState extends State<CityUI> {
                             // ),  //Model jasabay tuz ishtoo
                             Text(
                               weatherModel.icon ?? '☀️',
-                              style: kConditionTextStyle,
+                              style: AppTextStyles.conditionTextStyle,
                             ), //Model mn ishtoo
                             // Text(
                             //   weatherIcon ?? '☀️',
@@ -294,7 +259,7 @@ class _CityUIState extends State<CityUI> {
                               ? 'Weather in ${weatherModel.cityName}'
                               : '${weatherModel.message} in ${weatherModel.cityName}',
                           textAlign: TextAlign.right,
-                          style: kMessageTextStyle,
+                          style: AppTextStyles.messageTextStyle,
                         ),
                         // Text(
                         //   weatherMessage == null
@@ -318,3 +283,31 @@ class _CityUIState extends State<CityUI> {
 
 //Model 
 //Class
+
+
+
+//  Future<void> getCurrentLocationV1() async {
+//     setState(() {
+//       isLoading = true;
+//     });
+//     _position = await LocationProvider().getCurrentPosition();
+
+//     _data = await WeatherProvider().getWeatherData(position: _position);
+
+//     weatherModel = await WeatherProvider().getWeatherModel(position: _position);
+
+//     double _kelvin = _data['main']['temp'];
+
+//     _cityName = _data['name'];
+
+//     _celcius = (_kelvin - 273.15).round();
+
+//     // print('_position.lat: ${_position.latitude}');
+//     // print('_position.long: ${_position.longitude}');
+
+//     await Future.delayed(Duration(seconds: 1), () {});
+
+//     setState(() {
+//       isLoading = false;
+//     });
+//   }

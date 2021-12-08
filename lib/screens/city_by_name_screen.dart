@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:kurs2_sabak8/weather_provider.dart';
+import 'package:kurs2_sabak8/data/providers/weather_provider.dart';
 
-class CityByNameUI extends StatefulWidget {
+class CityByNameScreen extends StatefulWidget {
   final String cityName;
   final int temp;
-  const CityByNameUI({Key key, this.cityName, this.temp}) : super(key: key);
+  const CityByNameScreen({Key key, this.cityName, this.temp}) : super(key: key);
 
   @override
-  _CityByNameUIState createState() => _CityByNameUIState();
+  _CityByNameScreenState createState() => _CityByNameScreenState();
 }
 
-class _CityByNameUIState extends State<CityByNameUI> {
+class _CityByNameScreenState extends State<CityByNameScreen> {
   Map<String, dynamic> _cityWeatherData;
   int _celcius = 0;
 
